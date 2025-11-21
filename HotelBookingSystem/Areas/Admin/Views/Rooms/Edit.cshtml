@@ -1,0 +1,76 @@
+﻿@model HotelBookingSystem.Models.Room
+
+@{
+    ViewData["Title"] = "Edit Room";
+}
+
+<h2 class="fw-bold mb-4">Edit Room</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <form asp-action="Edit" enctype="multipart/form-data">
+
+            <input type="hidden" asp-for="Id" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Type" class="form-label"></label>
+                <input asp-for="Type" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Capacity" class="form-label"></label>
+                <input asp-for="Capacity" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="PricePerNight" class="form-label"></label>
+                <input asp-for="PricePerNight" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Current Image</label><br />
+
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl"
+                         style="width:150px; height:100px; object-fit:cover;"
+                         class="img-thumbnail mb-2" />
+                }
+                else
+                {
+                    <span class="text-muted">No image uploaded.</span>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Upload New Image</label>
+                <input type="file" name="imageFile" class="form-control" />
+                <small class="text-muted">Leave empty to keep current image.</small>
+            </div>
+
+            <button class="btn btn-primary">Save Changes</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

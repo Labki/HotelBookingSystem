@@ -1,0 +1,93 @@
+﻿@model HotelBookingSystem.Models.Booking
+@using HotelBookingSystem.Services
+
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
+<h2 class="fw-bold mb-4">Booking Details</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        @if (!string.IsNullOrEmpty(Model.Room?.ImageUrl))
+        {
+            <img src="@Model.Room?.ImageUrl"
+                 class="roomPreview img-thumbnail mb-3" />
+        }
+
+        <div class="card-form">
+            <dl class="row">
+
+                <dt class="col-sm-3 fw-bold">Room</dt>
+                <dd class="col-sm-9">@Model.Room?.Name</dd>
+
+                <dt class="col-sm-3 fw-bold">Check-In</dt>
+                <dd class="col-sm-9">@Model.CheckInDate.ToShortDateString()</dd>
+
+                <dt class="col-sm-3 fw-bold">Check-Out</dt>
+                <dd class="col-sm-9">@Model.CheckOutDate.ToShortDateString()</dd>
+
+                <dt class="col-sm-3 fw-bold">Total</dt>
+                <dd class="col-sm-9">€@Model.TotalPrice</dd>
+
+                <dt class="col-sm-3 fw-bold">Status</dt>
+                <dd class="col-sm-9">
+                    @switch (Model.Status)
+                    {
+                        case HotelBookingSystem.Models.BookingStatus.Pending:
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            break;
+                        case HotelBookingSystem.Models.BookingStatus.Confirmed:
+                            <span class="badge bg-success">Confirmed</span>
+                            break;
+                        case HotelBookingSystem.Models.BookingStatus.Completed:
+                            <span class="badge bg-primary">Completed</span>
+                            break;
+                    }
+                </dd>
+
+            </dl>
+
+            <a asp-action="Index" class="btn btn-secondary">Back</a>
+            <form asp-action="Cancel"
+                  asp-route-id="@Model.Id"
+                  method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger">Cancel</button>
+            </form>
+            <div class="mt-4">
+                @await Html.PartialAsync("_RoomFeaturesPartial",
+                RoomFeatureLookup.FeaturesByType.GetValueOrDefault(Model.Room?.Type ?? "", new List<string>()))
+            </div>
+        </div>
+    </div>
+    <div class="roomDescription">
+        @if (!string.IsNullOrEmpty(Model.Room?.Description))
+        {
+            <p class="text-muted">
+                @Model.Room.Description
+            </p>
+        }
+    </div>
+    <style>
+        .card-body {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+        }
+
+        .card-form {
+            width: 50%;
+        }
+
+        .roomPreview {
+            width: 50%;
+            padding: 0;
+            margin: 0;
+        }
+
+        .roomDescription {
+            padding: 20px;
+            margin: 0;
+        }
+    </style>
+</div>

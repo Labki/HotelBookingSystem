@@ -1,0 +1,176 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - HotelBookingSystem</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f8f9fc;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        /* Navbar */
+        .navbar-hotel {
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* Hero Section */
+        .hero-banner {
+            background: url('/images/hero-banner.png') center/cover no-repeat;
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 0 3px 10px rgba(0,0,0,.6);
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+
+        .hero-btn {
+            margin-top: 20px;
+            padding: 10px 25px;
+            font-size: 1.1rem;
+            background: white;
+            border: white;
+            color: #0b1735;
+        }
+
+        /* Page content */
+        .main-content {
+            padding: 30px 0;
+        }
+
+        /* Footer */
+        footer {
+            background: #ffffff;
+            padding: 20px 0;
+            border-top: 1px solid #ddd;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOP NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light navbar-hotel">
+        <div class="container">
+
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-hotel"></i> HotelBookingSystem
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav" aria-controls="navbarNav"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        if (!User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="UserBookings" asp-action="Index">My Bookings</a>
+                            </li>
+                        }
+                    }
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                    </li>
+
+                </ul>
+
+                <partial name="_LoginPartial" />
+
+            </div>
+        </div>
+    </nav>
+
+
+    <!-- HERO BANNER: Only show on HOME PAGE -->
+    @if (ViewContext.RouteData.Values["controller"]?.ToString() == "Home" &&
+        ViewContext.RouteData.Values["action"]?.ToString() == "Index")
+    {
+        <div class="hero-banner">
+            <div class="text-center">
+                <div class="hero-title">Welcome to Your Perfect Stay</div>
+                <div class="hero-subtitle">Modern comfort, easy booking, great experience.</div>
+
+                <a asp-controller="UserBookings" asp-action="Create" class="btn btn-primary hero-btn">
+                    <i class="fas fa-calendar-plus"></i> Book Now
+                </a>
+            </div>
+        </div>
+    }
+
+
+    <!-- MAIN CONTENT -->
+    <div class="container main-content">
+        @RenderBody()
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="text-center">
+        <div class="container">
+            <p>&copy; 2025 - HotelBookingSystem</p>
+        </div>
+    </footer>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Toast container -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+        <div id="appToast" class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="appToastBody">
+                    <!-- message from TempData -->
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var msg = '@TempData["ToastMessage"]';
+            if (msg && msg !== '') {
+                document.getElementById("appToastBody").innerText = msg;
+                var toastEl = document.getElementById('appToast');
+                var toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
+        });
+    </script>
+</body>
+</html>

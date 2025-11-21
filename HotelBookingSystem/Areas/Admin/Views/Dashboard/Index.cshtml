@@ -1,0 +1,178 @@
+﻿@model HotelBookingSystem.Areas.Admin.Controllers.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h2 class="fw-bold mb-4">Admin Dashboard</h2>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Total Rooms</h5>
+                <h2>@Model.TotalRooms</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Total Bookings</h5>
+                <h2>@Model.TotalBookings</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-dark bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">Pending</h5>
+                <h2>@Model.PendingBookings</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title">Today Check-ins</h5>
+                <h2>@Model.TodayCheckIns</h2>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <div>
+        <h4 class="mb-3">Latest Bookings</h4>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                @if (!Model.LatestBookings.Any())
+                {
+                    <p class="text-muted">No bookings yet.</p>
+                }
+                else
+                {
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Room</th>
+                                <th>Full Name</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var b in Model.LatestBookings)
+                            {
+                                <tr>
+                                    <td>@b.Room?.Name</td>
+                                    <td>@b.User.FirstName @b.User.LastName</td>
+                                    <td>@b.CheckInDate.ToShortDateString()</td>
+                                    <td>@b.CheckOutDate.ToShortDateString()</td>
+                                    <td>
+                                        @switch (b.Status)
+                                        {
+                                            case HotelBookingSystem.Models.BookingStatus.Pending:
+                                                <span class="badge bg-warning text-dark">Pending</span>
+                                                break;
+                                            case HotelBookingSystem.Models.BookingStatus.Confirmed:
+                                                <span class="badge bg-success">Confirmed</span>
+                                                break;
+                                            case HotelBookingSystem.Models.BookingStatus.Completed:
+                                                <span class="badge bg-primary">Completed</span>
+                                                break;
+                                            case HotelBookingSystem.Models.BookingStatus.Cancelled:
+                                                <span class="badge bg-danger">Cancelled</span>
+                                                break;
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+    <div>
+        @{
+            var calendar = Model.Calendar;
+        }
+
+        <h4 class="mt-4 mb-3">Booking Calendar</h4>
+
+        <div class="table-responsive">
+            <table class="table table-bordered calendar-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>Room</th>
+                        @foreach (var d in calendar.Dates)
+                        {
+                            <th class="text-center">@d.ToString("dd MMM")</th>
+                        }
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var room in calendar.Rooms)
+                    {
+                        <tr>
+                            <td><strong>@room.Name</strong></td>
+
+                            @foreach (var date in calendar.Dates)
+                            {
+                                var booking = calendar.Bookings
+                                .FirstOrDefault(b => b.RoomId == room.Id &&
+                                b.Status != BookingStatus.Cancelled &&
+                                date >= b.CheckInDate.Date &&
+                                date <= b.CheckOutDate.Date);
+
+                                if (booking != null)
+                                {
+                                    <td class="booking-cell @booking.Status.ToString().ToLower()">
+                                        @booking.User.FirstName
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td class="free-cell"></td>
+                                }
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <style>
+            .calendar-table th,
+            .calendar-table td {
+                padding: 6px;
+                text-align: center;
+                min-width: 80px;
+            }
+
+            .free-cell {
+                background: #f8f9fa;
+            }
+
+            .pending {
+                background: #ffc107 !important;
+                color: black;
+            }
+
+            .confirmed {
+                background: #28a745 !important;
+                color: white;
+            }
+
+            .completed {
+                background: #0d6efd !important;
+                color: white;
+            }
+
+            .cancelled {
+                background: #dc3545 !important;
+                color: white;
+            }
+        </style>
+    </div>
+</div>

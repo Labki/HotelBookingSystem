@@ -1,0 +1,66 @@
+﻿@model IEnumerable<HotelBookingSystem.Models.Room>
+
+@{
+    ViewData["Title"] = "Manage Rooms";
+}
+
+<h2 class="fw-bold mb-4">Manage Rooms</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Add New Room</a>
+</p>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Capacity</th>
+                    <th>Price</th>
+                    <th style="width:180px;">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var room in Model)
+                {
+                    <tr>
+                        <td>
+                            @if (!string.IsNullOrEmpty(room.ImageUrl))
+                            {
+                                <img src="@room.ImageUrl" class="img-thumbnail"
+                                     style="width:120px; height:80px; object-fit:cover;" />
+                            }
+                            else
+                            {
+                                <span class="text-muted">No Image</span>
+                            }
+                        </td>
+
+                        <td>@room.Name</td>
+                        <td>@room.Type</td>
+                        <td>@room.Capacity</td>
+                        <td>€@room.PricePerNight</td>
+
+                        <td>
+                            <a asp-action="Details" asp-route-id="@room.Id"
+                               class="btn btn-sm btn-outline-primary">Details</a>
+
+                            <a asp-action="Edit" asp-route-id="@room.Id"
+                               class="btn btn-sm btn-outline-warning">Edit</a>
+
+                            <a asp-action="Delete" asp-route-id="@room.Id"
+                               class="btn btn-sm btn-outline-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+
+    </div>
+</div>

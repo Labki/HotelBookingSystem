@@ -1,0 +1,144 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin • HotelBookingSystem</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            background: #1e1e2d;
+            color: #fff;
+            padding-top: 20px;
+        }
+
+            .sidebar .nav-link {
+                color: #c5c6d0;
+                padding: 12px 20px;
+                font-size: 15px;
+            }
+
+                .sidebar .nav-link:hover,
+                .sidebar .nav-link.active {
+                    background-color: #27293d;
+                    color: #fff;
+                }
+
+                .sidebar .nav-link i {
+                    margin-right: 10px;
+                }
+
+        .content-wrapper {
+            margin-left: 250px;
+            padding: 25px;
+        }
+
+        .navbar-admin {
+            margin-left: 250px;
+        }
+
+        #bookingCalendar {
+            height: 600px !important;
+            min-height: 500px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Left Sidebar -->
+    <div class="sidebar d-flex flex-column">
+        <div class="text-center mb-4">
+            <h4 class="fw-bold">Admin Panel</h4>
+            <small>@User.Identity?.Name</small>
+        </div>
+
+        <nav class="nav flex-column">
+
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")"
+               asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+
+            <hr class="text-white" />
+
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Rooms" ? "active" : "")"
+               asp-area="Admin" asp-controller="Rooms" asp-action="Index">
+                <i class="fas fa-bed"></i> Manage Rooms
+            </a>
+
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminBookings" ? "active" : "")"
+               asp-area="Admin" asp-controller="AdminBookings" asp-action="Index">
+                <i class="fas fa-calendar-check"></i> All Bookings
+            </a>
+
+            <hr class="text-white" />
+
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index">
+                <i class="fas fa-user-cog"></i> Account Settings
+            </a>
+
+            <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="mt-3 px-3">
+                <button type="submit" class="btn btn-danger w-100">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
+        </nav>
+    </div>
+
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand navbar-light bg-white border-bottom navbar-admin">
+        <div class="container-fluid">
+            <span class="navbar-brand fw-bold">
+                HotelBookingSystem Admin
+            </span>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="content-wrapper">
+        @RenderBody()
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var success = '@TempData["Success"]';
+            var error = '@TempData["Error"]';
+
+            if (success && success !== '') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: success
+                });
+            } else if (error && error !== '') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: error
+                });
+            }
+        });
+    </script>
+</body>
+</html>

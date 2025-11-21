@@ -1,0 +1,75 @@
+﻿@model IEnumerable<HotelBookingSystem.Models.Booking>
+@{
+    ViewData["Title"] = "My Bookings";
+}
+
+<h2 class="fw-bold mb-4">My Bookings</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        You have no bookings yet.
+        <a asp-action="Create" class="alert-link">Make a booking</a>.
+    </div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Room</th>
+                        <th>Check-In</th>
+                        <th>Check-Out</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var b in Model)
+                    {
+                        <tr>
+                            <td>@b.Room?.Name</td>
+                            <td>@b.CheckInDate.ToShortDateString()</td>
+                            <td>@b.CheckOutDate.ToShortDateString()</td>
+                            <td>€@b.TotalPrice</td>
+                            <td>
+                                @switch (b.Status)
+                                {
+                                    case HotelBookingSystem.Models.BookingStatus.Pending:
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                        break;
+                                    case HotelBookingSystem.Models.BookingStatus.Confirmed:
+                                        <span class="badge bg-success">Confirmed</span>
+                                        break;
+                                    case HotelBookingSystem.Models.BookingStatus.Completed:
+                                        <span class="badge bg-primary">Completed</span>
+                                        break;
+                                    case HotelBookingSystem.Models.BookingStatus.Cancelled:
+                                        <span class="badge bg-danger">Cancelled</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                @if (b.Status != HotelBookingSystem.Models.BookingStatus.Cancelled &&
+                                                        b.Status != HotelBookingSystem.Models.BookingStatus.Completed)
+                                {
+                                    <a asp-action="Details"
+                                       asp-route-id="@b.Id"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+}

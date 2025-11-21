@@ -1,0 +1,17 @@
+﻿@model IEnumerable<string>
+
+<div class="d-flex flex-wrap gap-3 mt-3">
+    @foreach (var feature in Model)
+    {
+        <div class="d-flex flex-column align-items-center text-center" style="width:80px;">
+            <object type="image/svg+xml"
+                    data="/images/svgs/@(feature).svg"
+                    class="room-icon"
+                    style="width:35px; height:35px;">
+            </object>
+            <small class="text-capitalize text-muted" style="font-size: .75rem;">
+                @feature.Replace("-", " ")
+            </small>
+        </div>
+    }
+</div>

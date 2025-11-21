@@ -1,0 +1,123 @@
+﻿@using HotelBookingSystem.Services
+@{
+    ViewData["Title"] = "Book a Room";
+}
+
+<h2 class="fw-bold mb-4">Book a Room</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <img id="roomPreview"
+             src=""
+             class="img-thumbnail mb-3" />
+        <div class="card-form">
+            <form asp-action="Create" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Room</label>
+                    <select id="roomSelect" name="roomId" class="form-select">
+                        @foreach (var room in ViewBag.Rooms)
+                        {
+                            <option value="@room.Id"
+                                    data-img="@room.ImageUrl"
+                                    data-description="@room.Description"
+                                    data-type="@room.Type">
+                                @room.Name — €@room.PricePerNight per night
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Check-In</label>
+                        <input type="date" name="checkInDate" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Check-Out</label>
+                        <input type="date" name="checkOutDate" class="form-control" required />
+                    </div>
+                </div>
+
+                <button class="btn btn-primary">Confirm Booking</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </form>
+            <div id="roomFeaturesContainer">
+                @{
+                    string roomType = (string)ViewBag.Rooms[0].Type;
+                    var features = RoomFeatureLookup.FeaturesByType[roomType];
+                }
+                @await Html.PartialAsync("_RoomFeaturesPartial", features)
+            </div>
+        </div>
+        <style>
+            .card-body {
+                display: flex;
+                justify-content: center;
+                gap: 50px;
+            }
+
+            .card-form {
+                width: 50%;
+            }
+
+            #roomPreview {
+                width: 50%;
+                padding: 0;
+                margin: 0;
+                display: none;
+            }
+            #roomDescription {
+                padding: 20px;
+                margin: 0;
+            }
+        </style>
+    </div>
+    <div>
+        <p id="roomDescription" class="text-muted" style="display:none;"></p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const roomSelect = document.getElementById("roomSelect");
+        const preview = document.getElementById("roomPreview");
+        const description = document.getElementById("roomDescription");
+        const featuresContainer = document.getElementById("roomFeaturesContainer");
+
+        function updatePreview() {
+            const selected = roomSelect.options[roomSelect.selectedIndex];
+            const imgUrl = selected.getAttribute("data-img");
+            const desc = selected.getAttribute("data-description");
+            const type = selected.getAttribute("data-type");
+
+            // image
+            if (imgUrl) {
+                preview.src = imgUrl;
+                preview.style.display = "block";
+            } else {
+                preview.style.display = "none";
+            }
+
+            // description
+            if (desc) {
+                description.innerText = desc;
+                description.style.display = "block";
+            } else {
+                description.style.display = "none";
+            }
+
+            fetch(`/UserBookings/GetFeaturesForType`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(type)
+            })
+            .then(r => r.text())
+            .then(html => {
+                featuresContainer.innerHTML = html;
+            });
+        }
+
+        roomSelect.addEventListener("change", updatePreview);
+        updatePreview();
+    });
+</script>

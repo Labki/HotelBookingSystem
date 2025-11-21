@@ -1,0 +1,78 @@
+﻿@model HotelBookingSystem.Models.Booking
+
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
+<h2 class="fw-bold mb-4">Booking Details</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <dl class="row">
+
+            <dt class="col-sm-3 fw-bold">Room</dt>
+            <dd class="col-sm-9">@Model.Room?.Name</dd>
+
+            <dt class="col-sm-3 fw-bold">User ID</dt>
+            <dd class="col-sm-9">@Model.User.FirstName @Model.User.LastName</dd>
+
+            <dt class="col-sm-3 fw-bold">Check-In</dt>
+            <dd class="col-sm-9">@Model.CheckInDate.ToShortDateString()</dd>
+
+            <dt class="col-sm-3 fw-bold">Check-Out</dt>
+            <dd class="col-sm-9">@Model.CheckOutDate.ToShortDateString()</dd>
+
+            <dt class="col-sm-3 fw-bold">Total Price</dt>
+            <dd class="col-sm-9">€@Model.TotalPrice</dd>
+
+            <dt class="col-sm-3 fw-bold">Status</dt>
+            <dd class="col-sm-9">
+                @switch (Model.Status)
+                {
+                    case HotelBookingSystem.Models.BookingStatus.Pending:
+                        <span class="badge bg-warning text-dark">Pending</span>
+                        break;
+                    case HotelBookingSystem.Models.BookingStatus.Confirmed:
+                        <span class="badge bg-success">Confirmed</span>
+                        break;
+                    case HotelBookingSystem.Models.BookingStatus.Completed:
+                        <span class="badge bg-primary">Completed</span>
+                        break;
+                    case HotelBookingSystem.Models.BookingStatus.Cancelled:
+                        <span class="badge bg-danger">Cancelled</span>
+                        break;
+                }
+            </dd>
+
+        </dl>
+
+        <div class="mt-3">
+
+            <a class="btn btn-outline-warning" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+            <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+
+            @if (Model.Status == HotelBookingSystem.Models.BookingStatus.Pending)
+            {
+                <form asp-action="Approve" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-success">Approve</button>
+                </form>
+                <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Cancel</button>
+                </form>
+            }
+            else if (Model.Status == HotelBookingSystem.Models.BookingStatus.Confirmed)
+            {
+                <form asp-action="Complete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-info text-white">Complete</button>
+                </form>
+                <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Cancel</button>
+                </form>
+            }
+
+        </div>
+
+
+    </div>
+</div>

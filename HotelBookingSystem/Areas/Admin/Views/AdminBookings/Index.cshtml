@@ -1,0 +1,165 @@
+﻿@using HotelBookingSystem.Models
+@model IEnumerable<HotelBookingSystem.Models.Booking>
+
+@{
+    ViewData["Title"] = "All Bookings";
+}
+
+<h2 class="fw-bold mb-4">All Bookings</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="get" class="row mb-3">
+            <div class="col-md-4">
+                <label>Filter by Room</label>
+                <select name="roomId" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Rooms</option>
+                    @foreach (var r in ViewBag.Rooms)
+                    {
+                        <option value="@r.Id" selected=@(ViewBag.SelectedRoom == r.Id ? "selected" : null)>
+                            @r.Name
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label>Filter by Status</label>
+                <select name="status" class="form-select" onchange="this.form.submit()">
+                    <option value="">All</option>
+                    <option value="Pending"   selected=@(ViewBag.SelectedStatus == BookingStatus.Pending ? "selected" : null)>Pending</option>
+                    <option value="Confirmed" selected=@(ViewBag.SelectedStatus == BookingStatus.Confirmed ? "selected" : null)>Confirmed</option>
+                    <option value="Completed" selected=@(ViewBag.SelectedStatus == BookingStatus.Completed ? "selected" : null)>Completed</option>
+                    <option value="Cancelled" selected=@(ViewBag.SelectedStatus == BookingStatus.Cancelled ? "selected" : null)>Cancelled</option>
+                </select>
+            </div>
+        </form>
+
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>
+                        <a class="sort-link"
+                           asp-action="Index"
+                           asp-route-sortOrder="@ViewBag.RoomSort">
+                            Room
+                            @Html.Raw(ViewBag.CurrentSort == "room_asc" ? "▲" : ViewBag.CurrentSort == "room_desc" ? "▼" : "")
+                        </a>
+                    </th>
+                    <th>
+                        <a class="sort-link"
+                           asp-action="Index"
+                           asp-route-sortOrder="@ViewBag.NameSort">
+                            Full Name
+                            @Html.Raw(ViewBag.CurrentSort == "name_asc" ? "▲" : ViewBag.CurrentSort == "name_desc" ? "▼" : "")
+                        </a>
+                    </th>
+                    <th>
+                        <a class="sort-link"
+                           asp-action="Index"
+                           asp-route-sortOrder="@ViewBag.DateSort">
+                            Check-In
+                            @Html.Raw(ViewBag.CurrentSort == "date_asc" ? "▲" : ViewBag.CurrentSort == "date_desc" ? "▼" : "")
+                        </a>
+                    </th>
+                    <th>Check-Out</th>
+                    <th>Total Price</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var b in Model)
+                {
+                    <tr>
+                        <td>@b.Room?.Name</td>
+                        <td>@b.User.FirstName @b.User.LastName</td>
+                        <td>@b.CheckInDate.ToShortDateString()</td>
+                        <td>@b.CheckOutDate.ToShortDateString()</td>
+                        <td>€@b.TotalPrice</td>
+                        <td>
+                            @switch (b.Status)
+                            {
+                                case HotelBookingSystem.Models.BookingStatus.Pending:
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    break;
+                                case HotelBookingSystem.Models.BookingStatus.Confirmed:
+                                    <span class="badge bg-success">Confirmed</span>
+                                    break;
+                                case HotelBookingSystem.Models.BookingStatus.Completed:
+                                    <span class="badge bg-primary">Completed</span>
+                                    break;
+                                case HotelBookingSystem.Models.BookingStatus.Cancelled:
+                                    <span class="badge bg-danger">Cancelled</span>
+                                    break;
+                            }
+                        </td>
+                        <td>
+
+                            <a class="btn btn-sm btn-outline-primary mb-1"
+                               asp-area="Admin"
+                               asp-controller="AdminBookings"
+                               asp-action="Details"
+                               asp-route-id="@b.Id">
+                                Details
+                            </a>
+                            @if (b.Status == BookingStatus.Pending)
+                            {
+                                <form asp-area="Admin"
+                                      asp-controller="AdminBookings"
+                                      asp-action="Approve"
+                                      asp-route-id="@b.Id"
+                                      method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                </form>
+                            }
+                            @if (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed)
+                            {
+                                <form asp-area="Admin"
+                                      asp-controller="AdminBookings"
+                                      asp-action="Cancel"
+                                      asp-route-id="@b.Id"
+                                      method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+                                </form>
+                            }
+                            @if (b.Status == BookingStatus.Confirmed)
+                            {
+                                <form asp-area="Admin"
+                                      asp-controller="AdminBookings"
+                                      asp-action="Complete"
+                                      asp-route-id="@b.Id"
+                                      method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-info">Complete</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <style>
+        .sort-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+            .sort-link:hover {
+                text-decoration: underline;
+                color: #dcdcdc;
+            }
+
+        /* Make arrows look nice */
+        th a {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        th {
+            white-space: nowrap;
+        }
+    </style>
+</div>
