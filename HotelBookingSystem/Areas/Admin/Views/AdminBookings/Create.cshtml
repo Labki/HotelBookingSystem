@@ -1,0 +1,70 @@
+﻿@model HotelBookingSystem.Models.Booking
+@using HotelBookingSystem.Models
+
+<h2 class="fw-bold mb-4">Create Booking</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+
+            <div class="mb-3">
+                <label class="form-label">Room</label>
+                <select asp-for="RoomId" class="form-select">
+                    @foreach (var room in ViewBag.Rooms)
+                    {
+                        <option value="@room.Id" data-price="@room.PricePerNight">
+                            @room.Name (€/night @room.PricePerNight)
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Guest Full Name</label>
+                <input name="guestFullName" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Check-In</label>
+                <input asp-for="CheckInDate" class="form-control" type="date" required id="checkIn" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Check-Out</label>
+                <input asp-for="CheckOutDate" class="form-control" type="date" required id="checkOut" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Total Price (€)</label>
+                <input asp-for="TotalPrice" class="form-control" id="totalPrice" readonly required />
+            </div>
+
+            <button class="btn btn-success mt-2" type="submit">Create Booking</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function calculatePrice() {
+        const roomSelect = document.querySelector("select[name='RoomId']");
+        const pricePerNight = parseFloat(roomSelect.selectedOptions[0].dataset.price);
+
+        const checkIn = document.getElementById("checkIn").value;
+        const checkOut = document.getElementById("checkOut").value;
+
+        if (!checkIn || !checkOut) return;
+
+        const start = new Date(checkIn);
+        const end = new Date(checkOut);
+
+        const nights = (end - start) / (1000 * 60 * 60 * 24);
+
+        if (nights > 0) {
+            document.getElementById("totalPrice").value = (nights * pricePerNight).toFixed(2);
+        }
+    }
+
+    document.getElementById("checkIn").addEventListener("change", calculatePrice);
+    document.getElementById("checkOut").addEventListener("change", calculatePrice);
+    document.querySelector("select[name='RoomId']").addEventListener("change", calculatePrice);
+</script>

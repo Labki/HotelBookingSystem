@@ -9,30 +9,34 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <form method="get" class="row mb-3">
-            <div class="col-md-4">
-                <label>Filter by Room</label>
-                <select name="roomId" class="form-select" onchange="this.form.submit()">
-                    <option value="">All Rooms</option>
-                    @foreach (var r in ViewBag.Rooms)
-                    {
-                        <option value="@r.Id" selected=@(ViewBag.SelectedRoom == r.Id ? "selected" : null)>
-                            @r.Name
-                        </option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-4">
-                <label>Filter by Status</label>
-                <select name="status" class="form-select" onchange="this.form.submit()">
-                    <option value="">All</option>
-                    <option value="Pending"   selected=@(ViewBag.SelectedStatus == BookingStatus.Pending ? "selected" : null)>Pending</option>
-                    <option value="Confirmed" selected=@(ViewBag.SelectedStatus == BookingStatus.Confirmed ? "selected" : null)>Confirmed</option>
-                    <option value="Completed" selected=@(ViewBag.SelectedStatus == BookingStatus.Completed ? "selected" : null)>Completed</option>
-                    <option value="Cancelled" selected=@(ViewBag.SelectedStatus == BookingStatus.Cancelled ? "selected" : null)>Cancelled</option>
-                </select>
-            </div>
-        </form>
+        <div class="d-flex justify-content-between">
+            <form method="get" class="row mb-3 flex-fill">
+                <div class="col-md-4">
+                    <label>Filter by Room</label>
+                    <select name="roomId" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Rooms</option>
+                        @foreach (var r in ViewBag.Rooms)
+                        {
+                            <option value="@r.Id" selected=@(ViewBag.SelectedRoom == r.Id ? "selected" : null)>
+                                @r.Name
+                            </option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>Filter by Status</label>
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="">All</option>
+                        <option value="Pending"   selected=@(ViewBag.SelectedStatus == BookingStatus.Pending ? "selected" : null)>Pending</option>
+                        <option value="Confirmed" selected=@(ViewBag.SelectedStatus == BookingStatus.Confirmed ? "selected" : null)>Confirmed</option>
+                        <option value="Completed" selected=@(ViewBag.SelectedStatus == BookingStatus.Completed ? "selected" : null)>Completed</option>
+                        <option value="Cancelled" selected=@(ViewBag.SelectedStatus == BookingStatus.Cancelled ? "selected" : null)>Cancelled</option>
+                    </select>
+                </div>
+            </form>
+            <a asp-action="Create"
+               class="d-flex justify-content-center align-items-center btn btn-primary my-4">Create Booking</a>
+        </div>
 
         <table class="table table-hover align-middle">
             <thead class="table-dark">

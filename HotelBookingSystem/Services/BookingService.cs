@@ -1,5 +1,6 @@
 ﻿using HotelBookingSystem.Data;
 using HotelBookingSystem.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelBookingSystem.Services
@@ -7,10 +8,12 @@ namespace HotelBookingSystem.Services
     public class BookingService : IBookingService
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public BookingService(ApplicationDbContext context)
+        public BookingService(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         public async Task<List<Booking>> GetAllBookingsAsync()
@@ -126,6 +129,51 @@ namespace HotelBookingSystem.Services
             await _context.SaveChangesAsync();
 
             return true;
+        }
+        public async Task<bool> CreateGuestUserAsync(ApplicationUser user)
+        {
+            var result = await _userManager.CreateAsync(user);
+
+            return result.Succeeded;
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> CreateManualBookingAsync(Booking booking)
+        {
+            if (booking.CheckOutDate <= booking.CheckInDate)
+                return (false, "Check-out date must be after check-in date.");
+
+            var room = await _context.Rooms.FindAsync(booking.RoomId);
+            if (room == null)
+                return (false, "Room not found.");
+
+            // Overlap check
+            bool overlap = await _context.Bookings.AnyAsync(b =>
+                b.RoomId == booking.RoomId &&
+                b.Status != BookingStatus.Cancelled &&
+                b.Status != BookingStatus.Completed &&
+                (
+                    (booking.CheckInDate >= b.CheckInDate && booking.CheckInDate < b.CheckOutDate) ||
+                    (booking.CheckOutDate > b.CheckInDate && booking.CheckOutDate <= b.CheckOutDate) ||
+                    (booking.CheckInDate <= b.CheckInDate && booking.CheckOutDate >= b.CheckOutDate)
+                )
+            );
+
+            if (overlap)
+                return (false, "Room is not available for the selected dates.");
+
+            var nights = (booking.CheckOutDate - booking.CheckInDate).Days;
+
+            booking.TotalPrice = nights * room.PricePerNight;
+
+            // Manual bookings from admin are CONFIRMED
+            if (booking.Status == 0)
+                booking.Status = BookingStatus.Confirmed;
+
+            // UserId is NULL 
+            _context.Bookings.Add(booking);
+            await _context.SaveChangesAsync();
+
+            return (true, null);
         }
     }
 }

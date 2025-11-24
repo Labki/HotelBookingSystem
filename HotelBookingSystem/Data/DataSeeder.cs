@@ -30,7 +30,10 @@ namespace HotelBookingSystem.Data
                 {
                     UserName = "Admin",
                     Email = adminEmail,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    FirstName = "System",
+                    LastName = "Administrator",
+                    DisplayName = "Admin"
                 };
 
                 var result = await userManager.CreateAsync(admin, adminPassword);

@@ -62,6 +62,58 @@ namespace HotelBookingSystem.Areas.Admin.Controllers
             return View(bookings);
         }
 
+        // GET: Admin/AdminBookings/Create
+        public async Task<IActionResult> Create()
+        {
+            var rooms = await _bookingService.GetAllRoomsAsync();
+            ViewBag.Rooms = rooms;
+
+            return View();
+        }
+
+        // POST: Admin/AdminBookings/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Booking booking, string guestFullName)
+        {
+            ModelState.Remove("Room");
+            ModelState.Remove("User");
+            ModelState.Remove("UserId");
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Rooms = await _bookingService.GetAllRoomsAsync();
+                return View(booking);
+            }
+
+            // Create temporary guest user
+            var guestUser = new ApplicationUser
+            {
+                UserName = Guid.NewGuid().ToString(),
+                Email = $"{Guid.NewGuid()}@guest.local",
+                FirstName = guestFullName.Split(" ").First(),
+                LastName = guestFullName.Contains(" ") ? guestFullName.Split(" ").Last() : "Guest",
+                DisplayName = guestFullName,
+                EmailConfirmed = true
+            };
+
+            await _bookingService.CreateGuestUserAsync(guestUser);
+
+            booking.UserId = guestUser.Id;
+
+            var result = await _bookingService.CreateManualBookingAsync(booking);
+
+            if (!result.Success)
+            {
+                ModelState.AddModelError("", "Unable to create booking.");
+                ViewBag.Rooms = await _bookingService.GetAllRoomsAsync();
+                return View(booking);
+            }
+
+            TempData["Success"] = "Booking created successfully.";
+            return RedirectToAction(nameof(Index));
+        }
+
         // GET: Admin/AdminBookings/Details
         public async Task<IActionResult> Details(int id)
         {

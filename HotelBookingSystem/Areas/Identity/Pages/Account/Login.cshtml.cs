@@ -122,7 +122,7 @@ namespace HotelBookingSystem.Areas.Identity.Pages.Account
                 }
 
                 var result = await _signInManager.PasswordSignInAsync(
-                        user.UserName == "Admin" ? Input.Email : user.UserName,
+                        user.UserName,
                         Input.Password,
                         Input.RememberMe,
                         lockoutOnFailure: false);

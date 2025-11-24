@@ -54,6 +54,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Room</th>
+                                <th>Type</th>
                                 <th>Full Name</th>
                                 <th>Check-In</th>
                                 <th>Check-Out</th>
@@ -65,6 +66,7 @@
                             {
                                 <tr>
                                     <td>@b.Room?.Name</td>
+                                    <td>@b.Room?.Type</td>
                                     <td>@b.User.FirstName @b.User.LastName</td>
                                     <td>@b.CheckInDate.ToShortDateString()</td>
                                     <td>@b.CheckOutDate.ToShortDateString()</td>
@@ -113,29 +115,68 @@
                 </thead>
 
                 <tbody>
+                    @{
+                        var dates = calendar.Dates;
+                    }
+
                     @foreach (var room in calendar.Rooms)
                     {
                         <tr>
                             <td><strong>@room.Name</strong></td>
 
-                            @foreach (var date in calendar.Dates)
-                            {
-                                var booking = calendar.Bookings
-                                .FirstOrDefault(b => b.RoomId == room.Id &&
-                                b.Status != BookingStatus.Cancelled &&
-                                date >= b.CheckInDate.Date &&
-                                date <= b.CheckOutDate.Date);
+                            @{
+                                int i = 0;
+                            }
 
-                                if (booking != null)
-                                {
-                                    <td class="booking-cell @booking.Status.ToString().ToLower()">
-                                        @booking.User.FirstName
-                                    </td>
-                                }
-                                else
+                            @while (i < dates.Count)
+                            {
+                                var day = dates[i];
+                                
+                                var booking = calendar.Bookings
+                                .FirstOrDefault(b =>
+                                b.RoomId == room.Id &&
+                                b.Status != BookingStatus.Cancelled &&
+                                day >= b.CheckInDate.Date &&
+                                day <= b.CheckOutDate.Date);
+
+                                if (booking == null)
                                 {
                                     <td class="free-cell"></td>
+                                    i++;
+                                    continue;
                                 }
+
+                                int span = 0;
+                                while (i + span < dates.Count &&
+                                dates[i + span] >= booking.CheckInDate.Date &&
+                                dates[i + span] <= booking.CheckOutDate.Date)
+                                {
+                                    span++;
+                                }
+
+                                <td colspan="@span"
+                                    class="booking-cell @booking.Status.ToString().ToLower() booking-tooltip"
+                                    data-price="€@booking.TotalPrice"
+                                    data-name="@booking.User.FirstName @booking.User.LastName"
+                                    data-checkin="@booking.CheckInDate.ToShortDateString()"
+                                    data-checkout="@booking.CheckOutDate.ToShortDateString()">
+
+                                    <span class="booking-label">@booking.User.FirstName @booking.User.LastName</span>
+
+                                    <div class="tooltip-box">
+                                        <div>
+                                            <strong>@booking.User.FirstName @booking.User.LastName</strong>
+                                            <br />
+                                            Price: €@booking.TotalPrice<br />
+                                        </div>
+                                        <div>
+                                            Check-In: @booking.CheckInDate.ToShortDateString()<br />
+                                            Check-Out: @booking.CheckOutDate.ToShortDateString()
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                i += span;
                             }
                         </tr>
                     }
@@ -143,11 +184,67 @@
             </table>
         </div>
         <style>
+            .booking-tooltip {
+                position: relative;
+                cursor: pointer;
+            }
+
+            .tooltip-box {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                position: absolute;
+                top: 90%;
+                left: 0;
+                background: #222;
+                color: #fff;
+                padding: 8px 12px;
+                border: 2px solid transparent;
+                border-radius: 6px;
+                font-size: 13px;
+                white-space: nowrap;
+                box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity .2s ease-in-out, top .2s ease-in-out;
+                z-index: 100;
+            }
+
+            .booking-tooltip:hover .tooltip-box {
+                opacity: 1;
+                top: 110%;
+            }
+
+            .tooltip-box.locked {
+                opacity: 1 !important;
+                top: 105% !important;
+                pointer-events: auto;
+                border-color: #fff;
+            }
+
+            .calendar-table tbody tr:last-child .tooltip-box,
+            .calendar-table tbody tr:nth-last-child(2) .tooltip-box {
+                top: -150% !important;
+            }
+
+            .calendar-table tbody tr:last-child .booking-tooltip:hover .tooltip-box,
+            .calendar-table tbody tr:nth-last-child(2) .booking-tooltip:hover .tooltip-box {
+                top: -175% !important;
+            }
+
+            .calendar-table tbody tr:last-child .tooltip-box.locked,
+            .calendar-table tbody tr:nth-last-child(2) .tooltip-box.locked {
+                top: -170% !important;
+            }
+
             .calendar-table th,
             .calendar-table td {
                 padding: 6px;
-                text-align: center;
                 min-width: 80px;
+            }
+            .calendar-table th {
+                text-align: center;
             }
 
             .free-cell {
@@ -174,5 +271,29 @@
                 color: white;
             }
         </style>
+        <script>
+            let lockedTooltip = null;
+
+            document.addEventListener("click", function (event) {
+                let cell = event.target.closest(".booking-tooltip");
+
+                if (cell) {
+                    let tooltip = cell.querySelector(".tooltip-box");
+
+                    if (lockedTooltip && lockedTooltip !== tooltip) {
+                        lockedTooltip.classList.remove("locked");
+                    }
+
+                    tooltip.classList.toggle("locked");
+                    lockedTooltip = tooltip.classList.contains("locked") ? tooltip : null;
+
+                    return;
+                }
+                if (lockedTooltip) {
+                    lockedTooltip.classList.remove("locked");
+                    lockedTooltip = null;
+                }
+            });
+        </script>
     </div>
 </div>

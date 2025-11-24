@@ -50,6 +50,19 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true &&
+        context.Request.Path == "/" &&
+        context.User.IsInRole("Admin"))
+    {
+        context.Response.Redirect("/Admin");
+        return;
+    }
+
+    await next();
+});
+
 // AREA routing
 app.MapControllerRoute(
     name: "areas",
